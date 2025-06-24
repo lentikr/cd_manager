@@ -1,0 +1,53 @@
+# .github/workflows/build.yml (修正版)
+
+name: Build for aarch64
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 第一步：检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 第二步：设置 QEMU 模拟器
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # 第三步：设置 Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 第四步：使用 Dockerfile 构建 aarch64 镜像
+      - name: Build executable using Docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: cd-builder:latest
+
+      # 第五步：从镜像中提取可执行文件 [已修正]
+      - name: Extract executable from Docker image
+        run: |
+          # 1. 从我们刚刚构建的镜像创建一个临时容器，并给它起个名字
+          docker create --name temp_container cd-builder:latest
+          
+          # 2. 使用 'docker cp' 命令，从临时容器中将文件复制到 Runner 的当前目录
+          # 格式为: docker cp <container_name>:<path_inside_container> <path_on_host>
+          docker cp temp_container:/app/cd_manager .
+          
+          # 3. 删除临时容器，清理环境
+          docker rm temp_container
+
+      # 第六步：上传编译产物
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cd-manager-aarch64
+          path: cd_manager
