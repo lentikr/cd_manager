@@ -121,8 +121,9 @@ static gboolean check_drive_status(gpointer user_data) {
         current_drive_exists = TRUE;
         UDisksBlock *block = udisks_object_get_block(object);
         if (block) {
-            // [核心修正] 使用 udisks_block_get_hint_has_media() 准确判断是否有介质
-            current_has_media = udisks_block_get_hint_has_media(block);
+            // [兼容性修复] udisks_block_get_hint_has_media() 在旧版库中不存在。
+            // 使用 udisks_block_get_size() 作为替代方案，如果容量大于0，则说明有介质。
+            current_has_media = (udisks_block_get_size(block) > 0);
             g_object_unref(block);
         }
 
