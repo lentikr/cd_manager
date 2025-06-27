@@ -200,6 +200,11 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
     
     state->window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(state->window), "光驱管理器");
+    
+    // [新功能] 设置窗口图标
+    // "drive-optical" 是一个标准图标名称，代表光驱设备
+    gtk_window_set_icon_name(GTK_WINDOW(state->window), "drive-optical");
+    
     gtk_window_set_default_size(GTK_WINDOW(state->window), 300, 180);
     gtk_window_set_resizable(GTK_WINDOW(state->window), FALSE);
     gtk_container_set_border_width(GTK_CONTAINER(state->window), 15);
